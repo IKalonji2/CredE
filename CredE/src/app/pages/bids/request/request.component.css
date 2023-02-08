@@ -1,0 +1,88 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.nav-header {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    padding: 10px;
+    padding-bottom: 20px;
+    background-color: var(--surface-b);
+}
+
+.header {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.header img {
+    margin-right: 10px;
+}
+
+.bids {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 150px;
+}
+
+.bid {
+    display: inline-block;
+    width: calc(100% - 8px);
+}
+
+.title {
+    padding: 15px 0 0 15px;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.row-between {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 0 10px;
+}
+
+.row-end {
+    display: flex;
+    justify-content: right;
+    gap: 10px;
+}
+
+.row {
+    display: flex;
+    gap: 10px;
+}
+
+@media screen and (min-width: 480px) {
+    .bid {
+        width: 100%;
+    }
+}
+
+@media screen and (min-width: 760px) {
+    .bid {
+        width: calc(50% - 5px);
+    }
+}
+
+@media screen and (min-width: 1200px) {
+    .bid {
+        width: calc(33.33% - 7px);
+    }
+}
+
+@media only screen and (min-width: 1520px) {
+    .bid {
+        width: calc(25% - 8px);
+    }
+}

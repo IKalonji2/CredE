@@ -1,0 +1,60 @@
+<div class="container">
+    <div class="nav-header">
+        <p-menubar>
+            <ng-template pTemplate="start">
+                <div class="header" routerLink="/">
+                    <label><i class="pi pi-circle-on" style="color: var(--primary-color); font-size: 1.3rem;"></i> Credit</label>
+                </div>
+            </ng-template>
+
+            <ng-template pTemplate="end">
+                <div class="row">
+                    <button pButton (click)="toggleRequestDialog()" label="Request Funds" class="p-button-sucess" icon="pi pi-chevron-circle-right" iconPos="right"></button>
+                </div>
+            </ng-template>
+        </p-menubar>
+
+        <div class="row-between">
+            <div class="header">Requests</div>
+            <div class="row-end">
+                <button pButton routerLink="debit" label="Debit" class="p-button-success p-button-outlined" icon="pi pi-minus-circle" iconPos="right"></button>
+                <button pButton routerLink="credit" label="Credit" class="p-button-info p-button-outlined" icon="pi pi-plus-circle" iconPos="right"></button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bids">
+        <div class="bid" *ngFor="let bid of bids">
+            <p-card>
+                <ng-template pTemplate="header">
+                    <div class="title">Request</div>
+                </ng-template>
+
+                Content
+
+                <ng-template pTemplate="footer">
+                    <div class="row-end">
+                        <div class="p-inputgroup">
+                            <span class="p-inputgroup-addon">Roc</span>
+                            <input type="number" #amount pInputText placeholder="Amount">
+                            <button (click)="fund('5FZsdofeuGbwh7CN6J4ksnmx2znPXu4TQwoK4hJkpSmgC6fy', 'Mothupi', amount.value)" pButton label="Fund" class="p-button-success p-button-outlined" icon="pi pi-arrow-circle-right" iconPos="right"></button>  
+                        </div>  
+                    </div>
+                </ng-template>
+            </p-card>
+        </div>
+    </div>
+</div>
+
+<p-confirmDialog #cd [breakpoints]="{'960px': '60vw', '640px': '90vw'}" [style]="{width: '40vw'}">
+    <ng-template pTemplate="footer">
+        <button type="button" class="p-button-secondary" pButton icon="pi pi-check" iconPos="right" label="Confirm" (click)="cd.accept()"></button>
+    </ng-template>
+</p-confirmDialog>
+
+<p-dialog header="Request Funds" [(visible)]="showRequestDialog" [modal]="true" [breakpoints]="{'960px': '70vw', '640px': '90vw'}" [style]="{width: '50vw'}">
+    Content
+    <ng-template pTemplate="footer">
+        <button pButton (click)="requestFunds()" label="Request" icon="pi pi-send" iconPos="right"></button>
+    </ng-template>
+</p-dialog>
