@@ -16,6 +16,7 @@
     padding: 10px;
     padding-bottom: 20px;
     background-color: var(--surface-b);
+    border-bottom: 1px solid var(--surface-a);
 }
 
 .header {
@@ -45,11 +46,16 @@
     font-weight: 700;
 }
 
+.request {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
 .row-between {
     display: flex;
     justify-content: space-between;
     gap: 10px;
-    padding: 0 10px;
 }
 
 .row-end {
@@ -61,6 +67,49 @@
 .row {
     display: flex;
     gap: 10px;
+}
+
+.btn, .text {
+    width: 50%;
+}
+
+.status {
+    margin: 20px 15px 0 0;
+}
+
+hr {
+    border: 1px solid var(--surface-c);
+}
+
+.bid-action {
+    display: flex;
+    gap: 5px;
+    color: var(--primary-color);
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.bid-action:hover {
+    opacity: .8;
+}
+
+.bid-action:active {
+    opacity: .6;
+}
+
+.bid-action span {
+    margin-top: 3px;
+}
+
+.bid-status {
+    display: flex;
+    justify-content: stretch;
+    gap: 5px;
+
+}
+
+.text-end {
+    text-align: right;
 }
 
 @media screen and (min-width: 480px) {

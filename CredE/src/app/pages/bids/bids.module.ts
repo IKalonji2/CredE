@@ -12,6 +12,11 @@ import { CardModule } from 'primeng/card';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogModule } from 'primeng/dialog';
 import { BidsComponent } from './bids.component';
+import { InputTextareaModule } from 'primeng/inputtextarea';
+import { FileUploadModule } from 'primeng/fileupload';
+import { HttpClientModule } from '@angular/common/http';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { TableModule } from 'primeng/table';
 
 
 @NgModule({
@@ -29,7 +34,12 @@ import { BidsComponent } from './bids.component';
     InputTextModule,
     CardModule,
     ConfirmDialogModule,
-    DialogModule
+    DialogModule,
+    InputTextareaModule,
+    FileUploadModule,
+    HttpClientModule,
+    OverlayPanelModule,
+    TableModule
   ]
 })
 export class BidsModule { }
