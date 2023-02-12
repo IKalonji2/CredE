@@ -2,8 +2,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { BidsRoutingModule } from './bids-routing.module';
-import { DebitComponent } from './debit/debit.component';
-import { CreditComponent } from './credit/credit.component';
 import { RequestComponent } from './request/request.component';
 import { ButtonModule } from 'primeng/button';
 import { MenubarModule } from 'primeng/menubar';
@@ -17,12 +15,13 @@ import { FileUploadModule } from 'primeng/fileupload';
 import { HttpClientModule } from '@angular/common/http';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { TableModule } from 'primeng/table';
+import { AccordionModule } from 'primeng/accordion';
+import { PanelModule } from 'primeng/panel';
+import { TabViewModule } from 'primeng/tabview';
 
 
 @NgModule({
   declarations: [
-    DebitComponent,
-    CreditComponent,
     RequestComponent,
     BidsComponent
   ],
@@ -39,7 +38,10 @@ import { TableModule } from 'primeng/table';
     FileUploadModule,
     HttpClientModule,
     OverlayPanelModule,
-    TableModule
+    TableModule,
+    AccordionModule,
+    PanelModule,
+    TabViewModule
   ]
 })
 export class BidsModule { }

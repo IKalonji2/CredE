@@ -16,24 +16,25 @@
 
         <div class="row-between">
             <div class="header">Requests</div>
+            
             <div class="row-end">
-                <button pButton routerLink="debit" label="Debit" class="p-button-success p-button-outlined" icon="pi pi-minus-circle" iconPos="right"></button>
-                <button pButton routerLink="credit" label="Credit" class="p-button-info p-button-outlined" icon="pi pi-plus-circle" iconPos="right"></button>
+                <button pButton (click)="toggleManageDialog()" label="Manage" class="p-button-warning p-button-outlined p-button-raised" icon="pi pi-cog" iconPos="right"></button>
             </div>
         </div>
     </div>
     
     <div class="bids">
-        <div class="bid" *ngFor="let request of requests">
-            <p-card *ngIf="request.active">
+        <div class="bid" *ngFor="let loan of loans">
+            <p-card *ngIf="loan.active">
                 <ng-template pTemplate="header">
                     <div class="row-between">
-                        <div class="title">{{request.owner}}</div>
+                        <div class="title">{{loan.owner}}</div>
+
                         <div class="status">
                             <div style="font-size: small; font-style: italic;">
                                 <span>approved </span>
-                                <i *ngIf="request.approved" class="pi pi-check" style="color: var(--green-500); font-size: small;"></i>
-                                <i *ngIf="!request.approved" class="pi pi-times" style="color: var(--red-500); font-size: small;"></i>
+                                <i *ngIf="loan.approved" class="pi pi-check" style="color: var(--green-500); font-size: small;"></i>
+                                <i *ngIf="!loan.approved" class="pi pi-times" style="color: var(--red-500); font-size: small;"></i>
                             </div>
                         </div>
                     </div>
@@ -42,35 +43,51 @@
                 <div class="content" style="font-size: 0.9rem; font-weight: 500;">
                     <div class="row-between">
                         <label>Requested</label>
-                        <i>{{request.requestedAmount}} {{currency}}</i>
+                        <i>{{loan.requestedAmount}} {{currency}}</i>
                     </div>
+
                     <hr>
+
                     <div class="row-between">
                         <label>Funded</label>
-                        <i>{{request.loanedAmount}} {{currency}}</i>
+                        <i>{{loan.loanedAmount}} {{currency}}</i>
                     </div>
+
                     <hr>
+
                     <div class="row-between">
                         <label>Short</label>
-                        <i>{{request.requestedAmount - request.loanedAmount}} {{currency}}</i>
+                        <i>{{loan.requestedAmount - loan.loanedAmount}} {{currency}}</i>
                     </div>
+
                     <hr>
+
                     <div class="row-between">
                         <label>Bids</label>
-                        <div class="bid-action" (click)="request.bids.length > 0 ? op.toggle($event) : null">
-                            <i>{{request.bids.length}} Bids</i>
+
+                        <div class="bid-action" (click)="loan.bids.length > 0 ? op.toggle($event) : null">
+                            <i>{{loan.bids.length}} Bids</i>
                             <span class="pi pi-angle-right"></span>
                         </div>
                     </div>
+
+                    <div style="margin-top: 10px;">
+                        <p-panel header="Documents" [toggleable]="true" [collapsed]="true" expandIcon="pi pi-chevron-down" collapseIcon="pi pi-chevron-up">
+                            <div class="row-between" *ngFor="let doc of loan.documents">
+                                <label style="margin-top: 5px;">{{doc.name}}</label>
+                                <button pButton (click)="downloadFile(doc.cid)" class="p-button-info p-button-text p-button-sm" pTooltip="download" icon="pi pi-download" iconPos="right"></button>
+                            </div>
+                        </p-panel>
+                    </div>
+
                     <p-overlayPanel #op>
                         <ng-template pTemplate>
-                            <p-table [value]="request.bids">
+                            <p-table [value]="loan.bids">
                                 <ng-template pTemplate="header">
                                     <tr>
                                         <th>Bid ({{currency}})</th>
                                         <th>Interest (%)</th>
                                         <th>Repayment ({{currency}})</th>
-                                        <th style="text-align: center;" *ngIf="request.ownerAddress == address">Action</th>
                                     </tr>
                                 </ng-template>
                                 <ng-template pTemplate="body" let-bid>
@@ -78,14 +95,6 @@
                                         <td style="text-align: end;">{{bid.bidAmount}}</td>
                                         <td style="text-align: end;">{{bid.interestRate}}</td>
                                         <td style="text-align: end;">{{bid.repaymentAmount}}</td>
-                                        <td style="text-align: center;" *ngIf="request.ownerAddress == address">
-                                            <div class="bid-status">
-                                                <button pButton style="width: 100%;" (click)="rejectBid(request.uuid, bid.uuid, bid.bidAmount, bid.interestRate)" pTooltip="reject" tooltipPosition="bottom" class="p-button-outlined p-button-danger p-button-sm" icon="pi pi-times" *ngIf="!bid.rejected && !bid.accepted"></button>
-                                                <button pButton style="width: 100%;" (click)="acceptBid(request.uuid, bid.uuid, bid.bidAmount, bid.interestRate)" pTooltip="accept" tooltipPosition="bottom" class="p-button-outlined p-button-success p-button-sm" icon="pi pi-check" *ngIf="!bid.rejected && !bid.accepted"></button>
-                                            </div>
-                                            <button pButton *ngIf="bid.accepted" label="Accepted" class="p-button-sm p-button-outlined p-button-success" iconPos="right" icon="pi pi-check"></button>
-                                            <button pButton *ngIf="bid.rejected" label="Rejected" class="p-button-sm p-button-outlined p-button-danger" iconPos="right" icon="pi pi-times"></button>
-                                        </td>
                                     </tr>
                                 </ng-template>
                             </p-table>
@@ -106,7 +115,7 @@
                             <span class="p-inputgroup-addon">{{currency}}</span>
                         </div>
                         
-                        <button pButton [disabled]="!(+amount.value > 0) || !(+interest.value > 0)" (click)="bid(request.uuid, amount.value, interest.value)" label="Bid" class="p-button-success p-button-outlined btn" icon="pi pi-arrow-circle-right" iconPos="right"></button>
+                        <button pButton [disabled]="!(+amount.value > 0) || !(+interest.value > 0)" (click)="bid(loan.uuid, amount.value, interest.value)" label="Bid" class="p-button-success p-button-outlined btn" icon="pi pi-arrow-circle-right" iconPos="right"></button>
                     </div>
                 </ng-template>
             </p-card>
@@ -114,13 +123,13 @@
     </div>
 </div>
 
-<p-confirmDialog #cd [breakpoints]="{'960px': '60vw', '640px': '90vw'}" [style]="{width: '40vw'}">
+<p-confirmDialog #cd [breakpoints]="{'960px': '50vw', '640px': '60vw', '480px': '90vw'}" [style]="{width: '40vw'}">
     <ng-template pTemplate="footer">
         <button type="button" class="p-button-secondary" pButton icon="pi pi-check" iconPos="right" label="Confirm" (click)="cd.accept()"></button>
     </ng-template>
 </p-confirmDialog>
 
-<p-dialog header="Request Funds" [(visible)]="showRequestDialog" [modal]="true" [breakpoints]="{'960px': '60vw', '640px': '70vw', '480px': '90vw'}" [style]="{width: '40vw'}">
+<p-dialog header="Request Funds" [(visible)]="showRequestDialog" [modal]="true" [breakpoints]="{'960px': '50vw', '640px': '60vw', '480px': '90vw'}" [style]="{width: '40vw'}">
     <div class="request">
         <div class="p-inputgroup txt">
             <span class="p-inputgroup-addon"><i class="pi pi-user"></i></span>
@@ -138,17 +147,219 @@
             <span class="p-inputgroup-addon">{{currency}}</span>
         </div>
 
-        <p-fileUpload name="myfile[]" url="../../" [multiple]="true" accept="image/*" [maxFileSize]="1000000">
-            <ng-template pTemplate="toolbar">
-                <div>Upload 3 Files</div>
-            </ng-template>
-
-            <ng-template pTemplate="content" let-files>
-                <div>Additional content.</div>
+        <p-fileUpload 
+            [name]="files"
+            chooseIcon="pi pi-file"
+            chooseStyleClass="p-button-info p-button-sm"
+            chooseLabel="Select File"
+            [multiple]="false"
+            [customUpload]="true"
+            (uploadHandler)="uploadFiles($event)"
+            [maxFileSize]="5000000"
+            [auto]="true"
+            accept=".pdf, image/*">
+            <ng-template let-file pTemplate="file">
+                <div class="row-between">
+                    <label *ngIf="file.type == 'application/pdf'" style="margin-top: 5px;"><i class="pi pi-file-pdf"></i> {{file.name}}</label>
+                    <label *ngIf="!(file.type == 'application/pdf')" style="margin-top: 5px;"><i class="pi pi-image"></i> {{file.name}}</label>
+                    <label style="margin-top: 5px;">{{file.size / 1000}} KB</label>
+                    <button pButton class="p-button-danger p-button-text p-button-sm" icon="pi pi-trash"></button>
+                </div>
+                <hr>
             </ng-template>
         </p-fileUpload>
     </div>
     <ng-template pTemplate="footer">
         <button pButton (click)="requestFunds(owner.value, approver.value, loan.value)" class="p-button-success" label="Request" icon="pi pi-send" iconPos="right"></button>
     </ng-template>
+</p-dialog>
+
+<p-dialog header="Manage Loans" [(visible)]="showManageDialog" [maximizable]="true" [modal]="true" [closable]="true" [breakpoints]="{'960px': '60vw', '640px': '70vw', '480px': '90vw'}" [style]="{'width': '50vw'}">
+    <p-tabView>
+        <p-tabPanel [headerStyle]="{'width':'100%'}">
+           <ng-template pTemplate="header">
+                <div class="tab-panel">
+                    <div>Loans</div>
+                    <i class="pi pi-arrow-up-right"></i>
+                </div>
+           </ng-template>
+            
+           <p-card *ngIf="!hasLoan()">
+                <div class="row-center">
+                    <div class="no-content">
+                        You Do Not Have Any Loans Yet!
+                    </div>
+                </div>
+           </p-card>
+
+            <div *ngIf="hasLoan()">
+                <div *ngFor="let loan of loans">
+                    <div *ngIf="loan.ownerAddress == address">
+                        <p-panel [header]="loan.owner" [toggleable]="true" [collapsed]="true" expandIcon="pi pi-chevron-down" collapseIcon="pi pi-chevron-up">
+                            <ng-template pTemplate="icons">
+                                <i><button pButton *ngIf="loan.approved" class="p-button-sm p-button-text p-button-success" label="approved" icon="pi pi-check" iconPos="right"></button></i>
+                                <i><button pButton *ngIf="!loan.approved" class="p-button-sm p-button-text p-button-danger" label="approved" icon="pi pi-times" iconPos="right"></button></i>
+                            </ng-template>
+
+                            <div class="row-between">
+                                <label>Amount Requested</label>
+                                <label>{{loan.requestedAmount}} {{currency}}</label>
+                            </div>
+
+                            <div class="row-between">
+                                <label>Amount Loaned</label>
+                                <label>{{loan.loanedAmount}} {{currency}}</label>
+                            </div>
+
+                            <div class="row-between">
+                                <label>Repaid</label>
+                                <label>{{loan.paidAmount}} {{currency}}</label>
+                            </div>
+
+                            <div class="row-between">
+                                <label>Owing</label>
+                                <label>{{loan.repaymentAmount - loan.paidAmount}} {{currency}}</label>
+                            </div>
+
+                            <hr>
+
+                            <div class="row-between" style="margin-bottom: 5px;" *ngFor="let bid of loan.bids">
+                                <label style="margin-top: 5px;">{{bid.bidAmount}} {{currency}} @ {{bid.interestRate}} %</label>
+
+                                <div class="row" *ngIf="!(bid.rejected || bid.accepted)">
+                                    <button pButton (click)="rejectBid(loan.uuid, bid.uuid)" class="p-button-danger p-button-text p-button-sm" pTooltip="reject" icon="pi pi-times"></button>
+                                    <button pButton (click)="acceptBid(loan.uuid, bid.uuid)" class="p-button-success p-button-text p-button-sm" pTooltip="accept" icon="pi pi-check"></button>
+                                </div>
+
+                                <div class="row" *ngIf="bid.rejected">
+                                    <button pButton class="p-button-danger p-button-text p-button-sm" label="rejected" icon="pi pi-times" iconPos="right" [disabled]="true"></button>
+                                </div>
+
+                                <div class="row" *ngIf="bid.repaid">
+                                    <button pButton class="p-button-info p-button-text p-button-sm" label="repaid" icon="pi pi-check" iconPos="right" [disabled]="true"></button>
+                                </div>
+
+                                <div class="row" *ngIf="bid.accepted && !bid.repaid">
+                                    <button pButton (click)="repayBid(loan.uuid, bid.uuid, bid.repaymentAmount)" label="{{bid.repaymentAmount}} {{currency}}" class="p-button-success p-button-sm p-button-outlined" pTooltip="repay" icon="pi pi-check" iconPos="right"></button>
+                                </div>
+                            </div>
+                        </p-panel>
+                    </div>
+                </div>
+            </div>
+        </p-tabPanel>
+
+        <p-tabPanel [headerStyle]="{'width':'100%'}">
+            <ng-template pTemplate="header">
+                <div class="tab-panel">
+                    <div>Bids</div>
+                    <i class="pi pi-arrow-down-left"></i>
+                </div>
+           </ng-template>
+           
+           <p-card *ngIf="!hasBid()">
+                <div class="row-center">
+                    <div class="no-content">
+                        You Have Not Made Any Bids Yet!
+                    </div>
+                </div>
+           </p-card>
+
+            <div *ngIf="hasBid()">
+                <div *ngFor="let loan of loans">
+                    <div *ngFor="let bid of loan.bids" style="margin-bottom: 5px;">
+                        <div *ngIf="bid.ownerAddress == address">
+                            <p-panel [header]="loan.owner" [toggleable]="true" [collapsed]="true" expandIcon="pi pi-chevron-down" collapseIcon="pi pi-chevron-up">
+                                <ng-template pTemplate="icons">
+                                    <button pButton *ngIf="(!bid.accepted && !bid.rejected)" class="p-button-sm p-button-text p-button-warning" label="pending" icon="pi pi-minus-circle" iconPos="right"></button>
+                                    <button pButton *ngIf="(bid.accepted && !bid.repaid)" class="p-button-sm p-button-text p-button-info" label="active" icon="pi pi-exclamation-circle" iconPos="right"></button>
+                                    <button pButton *ngIf="(bid.accepted && bid.repaid)" class="p-button-sm p-button-text p-button-success" label="repaid" icon="pi pi-check" iconPos="right"></button>
+                                    <button pButton *ngIf="(bid.rejected)" class="p-button-sm p-button-text p-button-danger" label="rejected" icon="pi pi-times" iconPos="right"></button>
+                                </ng-template>
+    
+                                <div class="row-between">
+                                    <label>Requested</label>
+                                    <label>{{loan.requestedAmount}} {{currency}}</label>
+                                </div>
+    
+                                <div class="row-between">
+                                    <label>Bid</label>
+                                    <label>{{bid.bidAmount}} {{currency}}</label>
+                                </div>
+    
+                                <div class="row-between">
+                                    <label>Owed</label>
+                                    <label>{{bid.repaymentAmount}} {{currency}}</label>
+                                </div>
+    
+                                <div class="row-between">
+                                    <label>Repaid</label>
+                                    <label>{{bid.paidAmount}} {{currency}}</label>
+                                </div>
+    
+                                <hr>
+    
+                                <div class="row-between" style="margin-bottom: 5px;" *ngFor="let doc of loan.documents">
+                                    <label>{{doc.name}}</label>
+                                    <button pButton (click)="downloadFile(doc.cid)" class="p-button-info p-button-text p-button-sm" icon="pi pi-download"></button>
+                                </div>
+                            </p-panel>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </p-tabPanel>
+
+        <p-tabPanel [headerStyle]="{'width':'100%'}">
+            <ng-template pTemplate="header">
+                <div class="tab-panel">
+                    <div>Approve</div>
+                    <i class="pi pi-check-square"></i>
+                </div>
+           </ng-template>
+
+           <p-card *ngIf="!hasLoanApprove()">
+                <div class="row-center">
+                    <div class="no-content">
+                        No Loans To Approve!
+                    </div>
+                </div>
+           </p-card>
+
+            <div *ngIf="hasLoanApprove()">
+                <div *ngFor="let loan of loans" style="margin-bottom: 5px;">
+                    <div *ngIf="loan.approverAddress == address">
+                        <p-panel [header]="loan.owner" [toggleable]="true" [collapsed]="true" expandIcon="pi pi-chevron-down" collapseIcon="pi pi-chevron-up">
+                            <ng-template pTemplate="icons">
+                                <i><button pButton *ngIf="loan.approved" class="p-button-sm p-button-text p-button-success" label="approved" icon="pi pi-check" iconPos="right"></button></i>
+                                <i><button pButton *ngIf="!loan.approved" class="p-button-sm p-button-text p-button-danger" label="approved" icon="pi pi-times" iconPos="right"></button></i>
+                            </ng-template>
+
+                            <div class="row-between">
+                                <label>Amount</label>
+                                <label>{{loan.requestedAmount}} {{currency}}</label>
+                            </div>
+
+                            <hr>
+
+                            <div class="row-between" style="margin-bottom: 5px;" *ngFor="let doc of loan.documents">
+                                <label>{{doc.name}}</label>
+                                <button pButton (click)="downloadFile(doc.cid)" class="p-button-info p-button-text p-button-sm" icon="pi pi-download"></button>
+                            </div>
+
+                            <ng-template pTemplate="footer">
+                                <div class="row-end">
+                                    <button pButton (click)="approveLoan(loan.uuid)" label="Approve" class="p-button-success p-button-sm p-button-outlined" icon="pi pi-check" iconPos="right" [disabled]="loan.approved"></button>
+                                </div>
+                            </ng-template>
+                        </p-panel>
+                    </div>
+                </div>
+            </div>
+        </p-tabPanel>
+    </p-tabView>
+</p-dialog>
+
+<p-dialog header="Repay Bid" [(visible)]="showRepayDialog" [modal]="true" [breakpoints]="{'960px': '40vw', '640px': '50vw', '480px': '90vw'}" [style]="{'width': '30vw'}">
+
 </p-dialog>

@@ -58,6 +58,11 @@
     gap: 10px;
 }
 
+.row-center {
+    display: flex;
+    justify-content: center;
+}
+
 .row-end {
     display: flex;
     justify-content: right;
@@ -110,6 +115,27 @@ hr {
 
 .text-end {
     text-align: right;
+}
+
+.w-100 {
+    width: 100%;
+}
+
+.tab-panel {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.tab-panel i {
+    margin-top: 5px;
+}
+
+.no-content {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--surface-d);
 }
 
 @media screen and (min-width: 480px) {

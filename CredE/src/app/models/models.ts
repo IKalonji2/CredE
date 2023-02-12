@@ -9,20 +9,21 @@ class Loan {
 
     requestedAmount: number = 0;
     loanedAmount: number = 0;
-    payedAmount: number = 0;
+    paidAmount: number = 0;
+    repaymentAmount: number = 0;
     interestAmount: number = 0;
 
     active: boolean = false;
     approved: boolean = false;
     rejected: boolean = false;
     fulfilled: boolean = false;
-    repayed: boolean = false;
+    repaid: boolean = false;
     
-    documents: string[] = [];
+    documents: any[] = [];
     bids: Bid[] = [];
 
     constructor(owner: string = 'Owner', ownerAddress: string = '', approverAddress: string = '',
-        requestedAmount: number = 0, documents: string[] = []) {
+        requestedAmount: number = 0, documents: any[] = []) {
         this.uuid = uuid();
         this.owner = owner ? owner : 'Owner';
         this.ownerAddress = ownerAddress;
@@ -35,7 +36,8 @@ class Loan {
     calculate() {
         this.bids.forEach(bid => {
             this.loanedAmount += bid.accepted ? bid.bidAmount : 0;
-            this.payedAmount += bid.accepted ? bid.payedAmount : 0;
+            this.paidAmount += bid.accepted ? bid.paidAmount : 0;
+            this.repaymentAmount += bid.accepted ? bid.repaymentAmount : 0;
         });
     }
 }
@@ -48,12 +50,12 @@ class Bid {
     bidAmount: number = 0;
     interestAmount: number = 0;
     repaymentAmount: number = 0;
-    payedAmount: number = 0;
+    paidAmount: number = 0;
 
     accepted: boolean = false;
     rejected: boolean = false;
     active: boolean = false;
-    repayed: boolean = false;
+    repaid: boolean = false;
 
     constructor(ownerAddress: string, bidAmount: number, interestRate: number) {
         this.uuid = uuid();
@@ -67,6 +69,27 @@ class Bid {
     calculate() {
         this.interestAmount = this.bidAmount * this.interestRate / 100;
         this.repaymentAmount = this.bidAmount + this.interestAmount;
+    }
+
+    accept() {
+        this.accepted = true;
+        this.rejected = false;
+        this.active = true;
+        this.calculate();
+    }
+
+    reject() {
+        this.accepted = false;
+        this.rejected = true;
+        this.active = false;
+    }
+
+    repay(amount: number) {
+        this.paidAmount += amount;
+        if(this.paidAmount >= this.repaymentAmount) {
+            this.repaid = true;
+            this.active = false;
+        }
     }
 }
 
