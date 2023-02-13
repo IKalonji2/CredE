@@ -5,7 +5,6 @@ class Loan {
     owner: string = '';
     ownerAddress: string = '';
     approverAddress: string = '';
-    description: string = '';
 
     requestedAmount: number = 0;
     loanedAmount: number = 0;
@@ -90,6 +89,76 @@ class Bid {
             this.repaid = true;
             this.active = false;
         }
+    }
+}
+
+class Contract {
+    loans: Loan[] = [];
+
+    getLoans(): Loan[] {
+        return this.loans;
+    }
+
+    requestLoan(uuid:string, owner: string, ownerAddress: string, approverAddress: string, amount: number, documents: any[]) {
+        const loan = new Loan(owner, ownerAddress, approverAddress, amount, documents);
+        loan.uuid = uuid;
+        this.loans.push(loan);
+    }
+
+    approveLoan(uuidLoan: string, approverAddress: string) {
+        const loanIndex = this.loans.findIndex(loan => loan.uuid == uuidLoan);
+        if(!this.indexExists(loanIndex)) return;
+
+        if(this.loans[loanIndex].approverAddress != approverAddress) return;
+        
+        this.loans[loanIndex].approved = true;
+    }
+
+    bid(uuidLoan: string, ownerAddress: string, amount: number, interest: number) {
+        const loanIndex = this.loans.findIndex(loan => loan.uuid == uuidLoan);
+        if(!this.indexExists(loanIndex)) return;
+
+        const bid = new Bid(ownerAddress, amount, interest);
+        this.loans[loanIndex].bids.push(bid);
+    }
+
+    acceptBid(uuidLoan: string, uuidBid: string) {
+        const loanIndex = this.loans.findIndex(loan => loan.uuid == uuidLoan);
+        if(!this.indexExists(loanIndex)) return;
+
+        const bidIndex = this.loans[loanIndex].bids.findIndex(bid => bid.uuid == uuidBid);
+        if(!this.indexExists(bidIndex)) return;
+
+        this.loans[loanIndex].bids[bidIndex].accepted = true;
+    }
+
+    rejectBid(uuidLoan: string, uuidBid: string) {
+        const loanIndex = this.loans.findIndex(loan => loan.uuid == uuidLoan);
+        if(!this.indexExists(loanIndex)) return;
+
+        const bidIndex = this.loans[loanIndex].bids.findIndex(bid => bid.uuid == uuidBid);
+        if(!this.indexExists(bidIndex)) return;
+
+        this.loans[loanIndex].bids[bidIndex].rejected = true;
+        this.loans[loanIndex].bids[bidIndex].active = false;
+    }
+
+    repayBid(uuidLoan: string, uuidBid: string, amount: number) {
+        const loanIndex = this.loans.findIndex(loan => loan.uuid == uuidLoan);
+        if(!this.indexExists(loanIndex)) return;
+
+        const bidIndex = this.loans[loanIndex].bids.findIndex(bid => bid.uuid == uuidBid);
+        if(!this.indexExists(bidIndex)) return;
+
+        this.loans[loanIndex].bids[bidIndex].paidAmount += amount;
+    }
+
+    sendFunds(senderAddress: string, receiverAddress: string, amount: number) {
+
+    }
+
+    indexExists(index: number) {
+        return index > -1;
     }
 }
 

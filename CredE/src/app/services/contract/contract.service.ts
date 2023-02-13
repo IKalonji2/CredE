@@ -12,7 +12,6 @@ export class ContractService {
   constructor(private fileService: FileService) { }
 
   async getLoans() {
-    await this.sleep(3000);
     return this.loans;
   }
 
@@ -31,7 +30,6 @@ export class ContractService {
     } else {
       this.loans.push(new Loan(owner, ownerAddress, approverAddress, loanedAmount, docs));
     }
-    await this.sleep(3000);
   }
 
   async bid(uuidLoan: string, ownerAddress: string, bidAmount: number, interestRate: number) {
@@ -40,7 +38,6 @@ export class ContractService {
     if(loanIndex > -1) {
       this.loans[loanIndex].bids.push(bid);
     }
-    await this.sleep(3000);
   }
 
   async approveLoan(uuidLoan: string) {
@@ -48,7 +45,6 @@ export class ContractService {
     if(loanIndex > -1) {
       this.loans[loanIndex].approved = true;
     }
-    await this.sleep(3000);
   }
 
   async acceptBid(uuidLoan: string, uuidBid: string) {
@@ -60,7 +56,6 @@ export class ContractService {
         this.loans[loanIndex].calculate();
       }
     }
-    await this.sleep(3000);
   }
 
   async rejectBid(uuidLoan: string, uuidBid: string) {
@@ -71,7 +66,6 @@ export class ContractService {
         this.loans[loanIndex].bids[bidIndex].reject();
       }
     }
-    await this.sleep(3000);
   }
 
   async repayBid(uuidLoan: string, uuidBid: string, amount: number) {
@@ -86,6 +80,5 @@ export class ContractService {
         }
       }
     }
-    await this.sleep(3000);
   }
 }
