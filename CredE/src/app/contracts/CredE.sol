@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 contract CredE {
 
-    uint numberOfLoans;
+    uint256 numberOfLoans;
 
     struct Bid{
         string uuid;
@@ -20,27 +20,28 @@ contract CredE {
         address approver; // entity that has signed the order/invoice
         bool verifiedByApprover;
         uint256 loanAmount;
-        string[] fileCID;
-        uint256 numberOfBids;
+        string fileCID;
         Bid[] Bids; 
     }
 
-    Loan[] loansCreated;
+    mapping(uint256 => Loan) public loansCreated;
+    Loan[] loansCreatedList;
 
-    constructor(){}
+    constructor()payable{}
 
     function createLoan(
         address _approver,
         uint256 _amount,
-        string[] memory _cids,
+        string memory _cids,
         string memory _loanUUID
-    )external returns(bool){
+    )external payable returns(bool){
         Loan storage newLoan = loansCreated[numberOfLoans];
         newLoan.approver = _approver;
         newLoan.loanAmount = _amount;
         newLoan.requestor = msg.sender;
         newLoan.fileCID = _cids;
         newLoan.uuid = _loanUUID;
+        loansCreatedList.push(newLoan);
         numberOfLoans++;
         return true;
     }
@@ -48,8 +49,8 @@ contract CredE {
     function getAllLoans()
         public 
         view 
-        returns(Loan[] memory _loans){
-        _loans = loansCreated;
+        returns(Loan[] memory){
+        return loansCreatedList;    
     }
 
     function createBid(
@@ -62,8 +63,8 @@ contract CredE {
         for(uint256 i = 0; i <= numberOfLoans; i++){
             if(keccak256(abi.encodePacked(loansCreated[i].uuid)) == keccak256(abi.encodePacked(_uuid))){
                 require(msg.value >= _amount, "Insufficient Amount");
-                loansCreated[i].Bids[loansCreated[i].numberOfBids] = Bid(_bidId, msg.sender, _amount, _rate, false, false);
-                loansCreated[i].numberOfBids++;
+                loansCreated[i].Bids.push(Bid(_bidId, msg.sender, _amount, _rate, false, false));
+                loansCreatedList[i] = loansCreated[i];
                 return true;
             }
         }
@@ -76,10 +77,11 @@ contract CredE {
     )external returns(bool){
         for(uint256 i = 0; i <= numberOfLoans; i++){
             if(keccak256(abi.encodePacked(loansCreated[i].uuid)) == keccak256(abi.encodePacked(_loanUUID))){
-                for(uint256 x = 0; x <= loansCreated[i].numberOfBids; x++){
+                for(uint256 x = 0; x <= loansCreated[i].Bids.length; x++){
                     if(keccak256(abi.encodePacked(loansCreated[i].Bids[x].uuid)) == keccak256(abi.encodePacked(_bidUUID))){
                         loansCreated[i].Bids[x].accepted = true;
                         sendMoney(loansCreated[i].requestor, loansCreated[i].Bids[x].bidAmount);
+                        loansCreatedList[i] = loansCreated[i];
                         return true;
                     }
                 }
@@ -88,7 +90,7 @@ contract CredE {
         return false;
     }
 
-    function sendMoney(address to, uint value) public {
+    function sendMoney(address to, uint value) internal {
         address payable receiver = payable(to);
         receiver.transfer(value);
     }
@@ -97,6 +99,7 @@ contract CredE {
         for(uint256 i = 0; i <= numberOfLoans; i++){
             if(keccak256(abi.encodePacked(loansCreated[i].uuid)) == keccak256(abi.encodePacked(_loanUUID))){
                 loansCreated[i].verifiedByApprover = true;
+                loansCreatedList[i] = loansCreated[i];
                 return true;
             }
         }
@@ -109,12 +112,13 @@ contract CredE {
     )external payable returns(bool){
         for(uint256 i = 0; i <= numberOfLoans; i++){
             if(keccak256(abi.encodePacked(loansCreated[i].uuid)) == keccak256(abi.encodePacked(_loanUUID))){
-                for(uint256 x = 0; x <= loansCreated[i].numberOfBids; x++){
+                for(uint256 x = 0; x <= loansCreated[i].Bids.length; x++){
                     if(keccak256(abi.encodePacked(loansCreated[i].Bids[x].uuid)) == keccak256(abi.encodePacked(_bidUUID))){
                         require(loansCreated[i].Bids[x].accepted == true, "Not accepted");
                         require(msg.value > (loansCreated[i].Bids[x].bidAmount + loansCreated[i].Bids[x].rate), "Insuffienct payment");
-                        loansCreated[i].Bids[x].accepted = true;
+                        loansCreated[i].Bids[x].repaid = true;
                         sendMoney(loansCreated[i].requestor, loansCreated[i].Bids[x].bidAmount);
+                        loansCreatedList[i] = loansCreated[i];
                         return true;
                     }
                 }
