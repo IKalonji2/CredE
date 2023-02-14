@@ -19,6 +19,15 @@
     border-bottom: 1px solid var(--surface-a);
 }
 
+.logo {
+    margin-top: 5px;
+    cursor: pointer;
+}
+
+.logo img {
+    height: 36px;
+}
+
 .header {
     font-size: 1.5rem;
     font-weight: 700;

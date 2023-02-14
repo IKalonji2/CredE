@@ -11,8 +11,8 @@ import { FileService } from 'src/app/services/file/file.service';
 })
 export class RequestComponent {
   loans: Loan[] = [];
-  address: string = '5FZsdofeuGbwh7CN6J4ksnmx2znPXu4TQwoK4hJkpSmgC6fy';
-  currency: string = 'Roc';
+  address: string = '';
+  currency: string = 'Wei';
   files: any = [];
 
   showRequestDialog: boolean = false;
@@ -26,8 +26,20 @@ export class RequestComponent {
 
   async ngOnInit() {
     this.showSpinner();
-    await this.contractService.getLoans().then((data: Loan[]) => this.loans = data);
-    this.hideSpinner();
+    await this.contractService.getWalletAddress().then(data => this.address = data).finally(() =>{
+      this.hideSpinner();
+    });
+    await this.getLoans();
+  }
+
+  async getLoans() {
+    this.showSpinner();
+    await this.contractService.getLoans().then((data: any) => {
+      console.log(data);
+      this.loans = data;
+    }).finally(() => {
+      this.hideSpinner();
+    });
   }
 
   async requestFunds(owner: string, approverAddress: string, amount: string) {
@@ -36,11 +48,18 @@ export class RequestComponent {
       message: 'Are you sure you want to request for this loan?',
       accept: async () => {
         this.showSpinner();
-        await this.contractService.createLoan(owner, this.address, approverAddress, +amount, this.files);
+        await this.contractService.createLoan(owner, this.address, approverAddress, +amount, this.files).then(data => {
+          console.log(data);
+        }).finally(async () => {
+          this.hideSpinner();
+          await this.getLoans();
+          this.toggleRequestDialog();
+        });
+      },
+      reject: () => {
         this.hideSpinner();
       }
     });
-    this.toggleRequestDialog();
   }
 
   async approveLoan(uuidLoan: string) {
@@ -49,11 +68,15 @@ export class RequestComponent {
       message: 'Are you sure you want to approve the loan?',
       accept: async () => {
         this.showSpinner();
-        await this.contractService.approveLoan(uuidLoan);
-        this.hideSpinner();
+        await this.contractService.approveLoan(uuidLoan).then(data => {
+          console.log(data);
+        }).finally(async () => {
+          this.hideSpinner();
+          await this.getLoans();
+        });
       },
       reject: () => {
-        console.log("Rejected!");
+        this.hideSpinner();
       }
     });
   }
@@ -64,11 +87,15 @@ export class RequestComponent {
       message: 'Are you sure you want to make a bid?',
       accept: async () => {
         this.showSpinner();
-        await this.contractService.bid(uuidLoan, this.address, +amount, +interest);
-        this.hideSpinner();
+        await this.contractService.bid(uuidLoan, this.address, +amount, +interest).then(data => {
+          console.log(data);
+        }).finally(async () => {
+          this.hideSpinner();
+          await this.getLoans();
+        });
       },
       reject: () => {
-        console.log("Rejected!");
+        this.hideSpinner();
       }
     });
   }
@@ -79,11 +106,15 @@ export class RequestComponent {
       message: 'Are you sure you want to accept the bid?',
       accept: async () => {
         this.showSpinner();
-        await this.contractService.acceptBid(uuidLoan, uuidBid);
-        this.hideSpinner();
+        await this.contractService.acceptBid(uuidLoan, uuidBid).then(data => {
+          console.log(data);
+        }).finally(async () => {
+          this.hideSpinner();
+          await this.getLoans();
+        });
       },
       reject: () => {
-        console.log("Rejected!");
+        this.hideSpinner();
       }
     });
   }
@@ -94,11 +125,15 @@ export class RequestComponent {
       message: 'Are you sure you want to reject the bid?',
       accept: async () => {
         this.showSpinner();
-        await this.contractService.rejectBid(uuidLoan, uuidBid);
-        this.hideSpinner();
+        await this.contractService.rejectBid(uuidLoan, uuidBid).then(data => {
+          console.log(data);
+        }).finally(async () => {
+          this.hideSpinner();
+          await this.getLoans();
+        });
       },
       reject: () => {
-        console.log("Rejected!");
+        this.hideSpinner();
       }
     });
   }
@@ -109,16 +144,21 @@ export class RequestComponent {
       message: 'Are you sure you want to repay the bid?',
       accept: async () => {
         this.showSpinner();
-        await this.contractService.repayBid(uuidLoan, uuidBid, amount);
-        this.hideSpinner();
+        await this.contractService.repayBid(uuidLoan, uuidBid, amount).then(data => {
+          console.log(data);
+        }).finally(async () => {
+          this.hideSpinner();
+          await this.getLoans();
+        });
       },
       reject: () => {
-        console.log("Rejected!");
+        this.hideSpinner();
       }
     });
   }
 
   uploadFiles(event: any) {
+    this.files = [];
     event.files.forEach((file: any) => {
       this.files.push(file);
     });
@@ -126,8 +166,12 @@ export class RequestComponent {
 
   async downloadFile(cid: string) {
     this.showSpinner();
-    await this.fileService.downloadFile(cid);
-    this.hideSpinner();
+    await this.fileService.downloadFile(cid).then(data => {
+      console.log(data);
+    }).finally(async () => {
+      this.hideSpinner();
+      await this.getLoans();
+    });
   }
 
   toggleManageDialog() {
@@ -155,12 +199,12 @@ export class RequestComponent {
   }
 
   hasLoan() {
-    return (this.loans.findIndex(loan => loan.ownerAddress == this.address) != -1);
+    return (this.loans.findIndex(loan => loan.ownerAddress.toLowerCase() == this.address.toLowerCase()) != -1);
   }
 
   hasBid() {
     for(let loan of this.loans) {
-      if(loan.bids.findIndex(bid => bid.ownerAddress == this.address) != -1) {
+      if(loan.bids.findIndex(bid => bid.ownerAddress.toLowerCase() == this.address.toLowerCase()) != -1) {
         return true;
       }
     }
@@ -168,7 +212,7 @@ export class RequestComponent {
   }
 
   hasLoanApprove() {
-    return (this.loans.findIndex(loan => loan.approverAddress == this.address) != -1);
+    return (this.loans.findIndex(loan => loan.approverAddress.toLowerCase() == this.address.toLowerCase()) != -1);
   }
 
   showSpinner() {

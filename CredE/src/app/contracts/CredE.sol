@@ -11,10 +11,12 @@ contract CredE {
         uint256 bidAmount;
         uint256 rate;
         bool accepted;
+        bool rejected;
         bool repaid;
     }
 
     struct Loan{
+        string owner;
         string uuid;
         address requestor; // person requesting funds
         address approver; // entity that has signed the order/invoice
@@ -30,12 +32,14 @@ contract CredE {
     constructor()payable{}
 
     function createLoan(
+        string memory _owner,
         address _approver,
         uint256 _amount,
         string memory _cids,
         string memory _loanUUID
     )external payable returns(bool){
         Loan storage newLoan = loansCreated[numberOfLoans];
+        newLoan.owner = _owner;
         newLoan.approver = _approver;
         newLoan.loanAmount = _amount;
         newLoan.requestor = msg.sender;
@@ -63,7 +67,7 @@ contract CredE {
         for(uint256 i = 0; i <= numberOfLoans; i++){
             if(keccak256(abi.encodePacked(loansCreated[i].uuid)) == keccak256(abi.encodePacked(_uuid))){
                 require(msg.value >= _amount, "Insufficient Amount");
-                loansCreated[i].Bids.push(Bid(_bidId, msg.sender, _amount, _rate, false, false));
+                loansCreated[i].Bids.push(Bid(_bidId, msg.sender, _amount, _rate, false, false, false));
                 loansCreatedList[i] = loansCreated[i];
                 return true;
             }
@@ -81,6 +85,26 @@ contract CredE {
                     if(keccak256(abi.encodePacked(loansCreated[i].Bids[x].uuid)) == keccak256(abi.encodePacked(_bidUUID))){
                         loansCreated[i].Bids[x].accepted = true;
                         sendMoney(loansCreated[i].requestor, loansCreated[i].Bids[x].bidAmount);
+                        loansCreatedList[i] = loansCreated[i];
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    function rejecttBid(
+        string memory _loanUUID,
+        string memory _bidUUID
+    )external returns(bool){
+        for(uint256 i = 0; i <= numberOfLoans; i++){
+            if(keccak256(abi.encodePacked(loansCreated[i].uuid)) == keccak256(abi.encodePacked(_loanUUID))){
+                for(uint256 x = 0; x <= loansCreated[i].Bids.length; x++){
+                    if(keccak256(abi.encodePacked(loansCreated[i].Bids[x].uuid)) == keccak256(abi.encodePacked(_bidUUID))){
+                        require(loansCreated[i].Bids[x].rejected == false);
+                        loansCreated[i].Bids[x].rejected = true;
+                        sendMoney(loansCreated[i].Bids[x].bidder, loansCreated[i].Bids[x].bidAmount);
                         loansCreatedList[i] = loansCreated[i];
                         return true;
                     }
@@ -115,7 +139,7 @@ contract CredE {
                 for(uint256 x = 0; x <= loansCreated[i].Bids.length; x++){
                     if(keccak256(abi.encodePacked(loansCreated[i].Bids[x].uuid)) == keccak256(abi.encodePacked(_bidUUID))){
                         require(loansCreated[i].Bids[x].accepted == true, "Not accepted");
-                        require(msg.value > (loansCreated[i].Bids[x].bidAmount + loansCreated[i].Bids[x].rate), "Insuffienct payment");
+                        require(msg.value >= (loansCreated[i].Bids[x].bidAmount + loansCreated[i].Bids[x].rate), "Insuffienct payment");
                         loansCreated[i].Bids[x].repaid = true;
                         sendMoney(loansCreated[i].requestor, loansCreated[i].Bids[x].bidAmount);
                         loansCreatedList[i] = loansCreated[i];

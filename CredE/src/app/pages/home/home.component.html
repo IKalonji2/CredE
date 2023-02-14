@@ -1,1 +1,15 @@
-<button pButton label="Connect" routerLink="/bids"></button>
+<div class="background">
+    <img src="../../../assets/dotex512x216.png">
+</div>
+
+<p-menubar>
+    <ng-template pTemplate="start">
+        <div class="logo" routerLink="/">
+            <img src="../../../../assets/dotex256x108.png">
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="end">
+        <button pButton label="Launch App" class="p-button-raised p-button-outlined" routerLink="/bids" icon="pi pi-sign-in" iconPos="right"></button>
+    </ng-template>
+</p-menubar>

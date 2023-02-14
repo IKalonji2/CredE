@@ -1,10 +1,5 @@
 export const ABI = [
 	{
-		"inputs": [],
-		"stateMutability": "payable",
-		"type": "constructor"
-	},
-	{
 		"inputs": [
 			{
 				"internalType": "string",
@@ -65,6 +60,11 @@ export const ABI = [
 	{
 		"inputs": [
 			{
+				"internalType": "string",
+				"name": "_owner",
+				"type": "string"
+			},
+			{
 				"internalType": "address",
 				"name": "_approver",
 				"type": "address"
@@ -97,11 +97,88 @@ export const ABI = [
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_loanUUID",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_bidUUID",
+				"type": "string"
+			}
+		],
+		"name": "rejecttBid",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_loanUUID",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_bidUUID",
+				"type": "string"
+			}
+		],
+		"name": "repayLoan",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "payable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_loanUUID",
+				"type": "string"
+			}
+		],
+		"name": "verifyEntity",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "getAllLoans",
 		"outputs": [
 			{
 				"components": [
+					{
+						"internalType": "string",
+						"name": "owner",
+						"type": "string"
+					},
 					{
 						"internalType": "string",
 						"name": "uuid",
@@ -161,6 +238,11 @@ export const ABI = [
 							},
 							{
 								"internalType": "bool",
+								"name": "rejected",
+								"type": "bool"
+							},
+							{
+								"internalType": "bool",
 								"name": "repaid",
 								"type": "bool"
 							}
@@ -188,6 +270,11 @@ export const ABI = [
 		],
 		"name": "loansCreated",
 		"outputs": [
+			{
+				"internalType": "string",
+				"name": "owner",
+				"type": "string"
+			},
 			{
 				"internalType": "string",
 				"name": "uuid",
@@ -220,49 +307,6 @@ export const ABI = [
 			}
 		],
 		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_loanUUID",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "_bidUUID",
-				"type": "string"
-			}
-		],
-		"name": "repayLoan",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_loanUUID",
-				"type": "string"
-			}
-		],
-		"name": "verifyEntity",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "nonpayable",
 		"type": "function"
 	}
 ]

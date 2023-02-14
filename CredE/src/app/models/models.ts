@@ -56,7 +56,7 @@ class Bid {
     active: boolean = false;
     repaid: boolean = false;
 
-    constructor(ownerAddress: string, bidAmount: number, interestRate: number) {
+    constructor(ownerAddress: string = "", bidAmount: number = 0, interestRate: number = 0) {
         this.uuid = uuid();
         this.ownerAddress = ownerAddress;
         this.bidAmount = bidAmount;
